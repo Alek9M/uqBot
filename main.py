@@ -1,4 +1,5 @@
 import logging
+import telebot
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -6,7 +7,6 @@ logging.basicConfig(
 )
 
 if __name__ == '__main__':
-    import telebot
 
     bot = telebot.TeleBot("", parse_mode=None)  # You can set parse_mode by default. HTML or MARKDOWN
 
