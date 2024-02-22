@@ -1,14 +1,18 @@
 import logging
 import telebot
+from dotenv import load_dotenv
+import os
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 
+load_dotenv('.env')
+
 if __name__ == '__main__':
 
-    bot = telebot.TeleBot("", parse_mode=None)  # You can set parse_mode by default. HTML or MARKDOWN
+    bot = telebot.TeleBot(os.getenv('TBOT_KEY'), parse_mode=None)  # You can set parse_mode by default. HTML or MARKDOWN
 
 
     @bot.message_handler(commands=['start', 'help'])
