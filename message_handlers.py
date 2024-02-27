@@ -4,6 +4,7 @@ import os
 import telebot
 
 from custom_dataclasses import *
+from database_connection import add_group, db_register
 from helper import *
 
 groups: list[Group] = list()
@@ -37,15 +38,16 @@ def find_group(by: telebot.types.Message):
 
 
 def register_group(group: Group, from_: telebot.types.Message):
-    group.title = from_.chat.title
-    group.id = from_.chat.id
     group.registering = None
+
+    member = Member(id=from_.from_user.id, username=from_.from_user.username)
+    group = Group(registering=from_, id=from_.chat.id)
+    db_register(group, member)
 
 
 def init_registering_group(from_: telebot.types.Message):
-    groups.append(
-        Group(registering=from_, members={Member(id=from_.from_user.id, username=from_.from_user.username)}, id=from_.chat.id)
-    )
+    group = Group(id=from_.chat.id, registering=from_, title=from_.chat.title)
+    groups.append(group)
 
 
 def init_bot_handlers(bot):
@@ -74,12 +76,13 @@ def init_bot_handlers(bot):
                 bot.send_message(message.chat.id, "Groups error")
                 return
             group = matched_groups[0]
-            register_group(group, message)
-            bot.send_message(message.chat.id, "Password accepted")
+            # register_group(group, message)
+            # bot.send_message(message.chat.id, "Password accepted")
             if group.registering is not None and same_origin(group.registering, message):
                 register_group(group, message)
-                bot.register_next_step_handler(message, None)
+                bot.register_next_step_handler(message, processing)
                 bot.send_message(message.chat.id, "Password accepted")
+                bot.send_message(group.id, f"Registered {group.id}")
             else:
                 bot.send_message(message.chat.id, "Unknown user")
 
@@ -108,7 +111,8 @@ def init_bot_handlers(bot):
 
     @bot.message_handler(content_types=['text'])
     def processing(message: telebot.types.Message):
-        if message.chat.type == "supergroup":
-            group = find_group(message)
-            group.members.add(Member.from_(message))
-            logging.info(group)
+        pass
+        # if message.chat.type == "supergroup":
+        #     group = find_group(message)
+        #     group.members.add(Member.from_(message))
+        #     logging.info(group)

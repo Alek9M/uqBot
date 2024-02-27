@@ -1,35 +1,50 @@
 import os
+from typing import Optional
 
 import sqlalchemy
 from sqlalchemy.orm import Session
 
-from custom_dataclasses import reg, Member
+from custom_dataclasses import reg, Member, Group
 
 # To run only
 from dotenv import load_dotenv
 
 # connect to database using credentials from .env
-sql_engine = None
+# TODO: uncomment assignment
+sql_engine = None # sqlalchemy.create_engine(os.getenv("RDS_FULL"))
+# sql_engine = None
 
 
 # .connect(host=os.getenv("RDS_ENDPOINT"), db=os.getenv("RDS_DB_NAME"),
 #                 user=os.getenv("RDS_USERNAME"), password=os.getenv("RDS_PASSWORD")))
 
-def add(member: Member):
+def add_member(*, member: Member):
     with Session(sql_engine) as session:
         session.add(member)
         session.commit()
 
 
-if __name__ == '__main__':
-    load_dotenv('.env')
-    sql_engine = sqlalchemy.create_engine(os.getenv("RDS_FULL"))
-    reg.metadata.drop_all(sql_engine)
-    reg.metadata.create_all(sql_engine)
-    # clear metadata
-
+def add_group(*, group: Group):
     with Session(sql_engine) as session:
-        member = Member(username='XXXX', id=1)
-        session.add(member)
+        session.add(group)
         session.commit()
-    print("Done")
+
+def db_register(group: Group, by: Optional[Member]):
+    with Session(sql_engine) as session:
+        session.add(group.members[0])
+        session.add(group)
+        # group.members.append(by)
+        session.commit()
+
+# if __name__ == '__main__':
+#     load_dotenv('.env')
+#     sql_engine = sqlalchemy.create_engine(os.getenv("RDS_FULL"))
+#     reg.metadata.drop_all(sql_engine)
+#     reg.metadata.create_all(sql_engine)
+#     # clear metadata
+#
+#     with Session(sql_engine) as session:
+#         member = Member(username='XXXX', id=1)
+#         session.add(member)
+#         session.commit()
+#     print("Done")
