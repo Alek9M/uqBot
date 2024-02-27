@@ -1,4 +1,6 @@
 telebot
 python-dotenv
+psycopg2-binary
 SQLAlchemy
+pymysql
 python3-pip

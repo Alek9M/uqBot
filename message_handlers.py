@@ -44,7 +44,7 @@ def register_group(group: Group, from_: telebot.types.Message):
 
 def init_registering_group(from_: telebot.types.Message):
     groups.append(
-        Group(registering=from_, members={Member(id=from_.from_user.id, username=from_.from_user.username)})
+        Group(registering=from_, members={Member(id=from_.from_user.id, username=from_.from_user.username)}, id=from_.chat.id)
     )
 
 

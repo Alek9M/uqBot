@@ -1,13 +1,34 @@
-from dataclasses import *
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import registry
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column
+from sqlalchemy import Table
+
+from typing import Optional
+from typing import List
+
 import telebot
 
-from dataclasses import field
+reg = registry()
 
+association_table = Table(
+    "association_table",
+    reg.metadata,
+    Column("group_id", ForeignKey("groups.id"), primary_key=True),
+    Column("member_id", ForeignKey("members.id"), primary_key=True),
+)
 
-@dataclass(order=True, frozen=True)
+@reg.mapped_as_dataclass(order=True)
 class Member:
-    username: str
-    id: int = field(compare=False, repr=False)
+    __tablename__ = "members"
+
+    username: Mapped[str]
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)# = field(compare=False, repr=False)
+
+    # group_id: Mapped[int] = mapped_column(ForeignKey("group.id"))
+    # group: Mapped["Group"] = relationship(default=None)
 
     @staticmethod
     def from_(message: telebot.types.Message):
@@ -17,10 +38,15 @@ class Member:
         return Member(message.from_user.username, message.from_user.id)
 
 
-@dataclass(order=True)
+@reg.mapped_as_dataclass(order=True)
 class Group:
-    registering: telebot.types.Message = field(compare=False, hash=False, repr=False)
-    members: set[Member] = field(default_factory=set, compare=False, hash=False)
-    title: str = field(default="", hash=False)
+    __tablename__ = "groups"
+
+    members: Mapped[List["Member"]] = relationship(secondary=association_table)
+    # members: set[Member] = mapped_column(default_factory=set, compare=False, hash=False)# = field(default_factory=set, compare=False, hash=False)
+
+    registering: Optional[telebot.types.Message] = None# = field(compare=False, hash=False, repr=False)
+
+    title: Mapped[str] = mapped_column(default="")# = field(default="", hash=False)
     # TODO: make id the only field used when compared as a dataclass
-    id: int | None = field(default=None, compare=False, repr=False)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)# = field(default=None, compare=False, repr=False)
