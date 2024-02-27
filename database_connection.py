@@ -31,9 +31,9 @@ def add_group(*, group: Group):
 
 def db_register(group: Group, by: Member):
     with Session(sql_engine) as session:
-        session.add(group.members[0])
-        session.add(group)
+        session.add(by)
         group.members.append(by)
+        session.add(group)
         session.commit()
 
 # if __name__ == '__main__':
