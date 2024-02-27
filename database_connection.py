@@ -6,11 +6,11 @@ from sqlalchemy.orm import Session
 
 from custom_dataclasses import reg, Member, Group
 
-# To run only
 from dotenv import load_dotenv
 
 # connect to database using credentials from .env
 # TODO: uncomment assignment
+load_dotenv('.env')
 sql_engine = sqlalchemy.create_engine(os.getenv("RDS_FULL"))
 # sql_engine = None
 
