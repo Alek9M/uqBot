@@ -25,6 +25,7 @@ class Member:
     __tablename__ = "members"
 
     username: Mapped[str]
+    personal_chat_id: Mapped[Optional[int]] = mapped_column(default=None, nullable=True)
     id: Mapped[int] = mapped_column(primary_key=True)# = field(compare=False, repr=False)
 
     # group_id: Mapped[int] = mapped_column(ForeignKey("group.id"))
