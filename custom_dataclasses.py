@@ -42,11 +42,12 @@ class Member:
 class Group:
     __tablename__ = "groups"
 
+    # TODO: make id the only field used when compared as a dataclass
+    id: Mapped[int] = mapped_column(primary_key=True)  # = field(default=None, compare=False, repr=False)
+
     members: Mapped[List["Member"]] = relationship(secondary=association_table)
     # members: set[Member] = mapped_column(default_factory=set, compare=False, hash=False)# = field(default_factory=set, compare=False, hash=False)
 
     registering: Optional[telebot.types.Message] = None# = field(compare=False, hash=False, repr=False)
 
     title: Mapped[str] = mapped_column(default="")# = field(default="", hash=False)
-    # TODO: make id the only field used when compared as a dataclass
-    id: Mapped[int] = mapped_column(primary_key=True)# = field(default=None, compare=False, repr=False)
