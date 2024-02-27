@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import registry
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column
 from sqlalchemy import Table
@@ -25,7 +25,7 @@ class Member:
     __tablename__ = "members"
 
     username: Mapped[str]
-    id: Mapped[int] = mapped_column(primary_key=True)# = field(compare=False, repr=False)
+    id: Mapped[BigInteger] = mapped_column(primary_key=True)# = field(compare=False, repr=False)
 
     personal_chat_id: Mapped[Optional[int]] = mapped_column(default=None, nullable=True)
     # group_id: Mapped[int] = mapped_column(ForeignKey("group.id"))
@@ -44,7 +44,7 @@ class Group:
     __tablename__ = "groups"
 
     # TODO: make id the only field used when compared as a dataclass
-    id: Mapped[int] = mapped_column(primary_key=True)  # = field(default=None, compare=False, repr=False)
+    id: Mapped[BigInteger] = mapped_column(primary_key=True)  # = field(default=None, compare=False, repr=False)
 
     members: Mapped[List["Member"]] = relationship(secondary=association_table, default_factory=list)
     # members: set[Member] = mapped_column(default_factory=set, compare=False, hash=False)# = field(default_factory=set, compare=False, hash=False)

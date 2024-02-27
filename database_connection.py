@@ -36,15 +36,15 @@ def db_register(group: Group, by: Member):
         session.add(group)
         session.commit()
 
-# if __name__ == '__main__':
-#     load_dotenv('.env')
-#     sql_engine = sqlalchemy.create_engine(os.getenv("RDS_FULL"))
-#     reg.metadata.drop_all(sql_engine)
-#     reg.metadata.create_all(sql_engine)
-#     # clear metadata
-#
-#     with Session(sql_engine) as session:
-#         member = Member(username='XXXX', id=1)
-#         session.add(member)
-#         session.commit()
-#     print("Done")
+if __name__ == '__main__':
+    # load_dotenv('.env')
+    # sql_engine = sqlalchemy.create_engine(os.getenv("RDS_FULL"))
+    reg.metadata.drop_all(sql_engine)
+    reg.metadata.create_all(sql_engine)
+    # clear metadata
+
+    # with Session(sql_engine) as session:
+    #     member = Member(username='XXXX', id=1)
+    #     session.add(member)
+    #     session.commit()
+    print("Reset")
