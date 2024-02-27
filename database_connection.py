@@ -36,7 +36,7 @@ def db_find_group(by: telebot.types.Message):
         stmt = select(Group).where(Group.id == by.chat.id)
         matches = session.execute(stmt)
 
-        if matches.length() == 0 or matches.length() > 1:
+        if matches.rowcount == 0 or matches.rowcount > 1:
             return None
 
         return matches[0]
@@ -47,7 +47,7 @@ def db_member_exists(message: telebot.types.Message):
         stmt = select(Group).where(Group.id == message.chat.id)
         matches = session.execute(stmt)
 
-        if matches.length() > 1 or matches.length() == 0:
+        if matches.rowcount > 1 or matches.rowcount == 0:
             return True
             return False
 
