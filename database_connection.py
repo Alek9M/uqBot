@@ -24,7 +24,7 @@ def add(member: Member):
 if __name__ == '__main__':
     load_dotenv('.env')
     sql_engine = sqlalchemy.create_engine(os.getenv("RDS_FULL"))
-    reg.metadata.create_all(sql_engine)
+    reg.metadata.drop_all(sql_engine)
     reg.metadata.create_all(sql_engine)
     # clear metadata
 
