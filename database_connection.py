@@ -27,14 +27,14 @@ def db_add_member(member: Member):
         session.add(member)
         group = db_find_group(member)
         session.refresh(group)
-        group.members.append(memb)
+        group.members.append(member)
         session.commit()
 
 
 def db_find_group(by: telebot.types.Message):
     with Session(sql_engine) as session:
         stmt = select(Group).where(Group.id == by.chat.id)
-        matches = session.scalars(stmt)
+        matches = session.execute(stmt)
 
         if not matches or len(matches) == 0:
             return None
@@ -45,7 +45,7 @@ def db_find_group(by: telebot.types.Message):
 def db_member_exists(message: telebot.types.Message):
     with (Session(sql_engine) as session):
         stmt = select(Group).where(Group.id == message.chat.id)
-        matches = session.scalars(stmt)
+        matches = session.execute(stmt)
 
         if not matches or len(matches) == 0:
             return False
