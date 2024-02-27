@@ -25,7 +25,7 @@ class Member:
     __tablename__ = "members"
 
     username: Mapped[str]
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)# = field(compare=False, repr=False)
+    id: Mapped[int] = mapped_column(primary_key=True)# = field(compare=False, repr=False)
 
     # group_id: Mapped[int] = mapped_column(ForeignKey("group.id"))
     # group: Mapped["Group"] = relationship(default=None)
@@ -49,4 +49,4 @@ class Group:
 
     title: Mapped[str] = mapped_column(default="")# = field(default="", hash=False)
     # TODO: make id the only field used when compared as a dataclass
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)# = field(default=None, compare=False, repr=False)
+    id: Mapped[int] = mapped_column(primary_key=True)# = field(default=None, compare=False, repr=False)
