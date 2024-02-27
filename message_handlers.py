@@ -1,0 +1,114 @@
+import logging
+import os
+
+import telebot
+
+from custom_dataclasses import *
+from helper import *
+
+groups: list[Group] = list()
+
+
+# 'same origin' (Message) function to determine if messages come from the same group and person and returns Bool
+def same_origin(message1: telebot.types.Message, message2: telebot.types.Message):
+    if message1.chat.id != message2.chat.id:
+        return False
+
+    if message1.chat.type == "private":
+        return True
+    elif message1.chat.type == "supergroup":
+        return message1.from_user.id == message2.from_user.id
+
+    return False
+
+
+def originates(message: telebot.types.Message, from_: Group):
+    return message.chat.id == from_.id
+
+
+def find_group(by: telebot.types.Message):
+    matches = [group for group in groups if
+               group.id == by.chat.id]
+
+    if len(matches) > 1 or len(matches) == 0:
+        return None
+
+    return matches[0]
+
+
+def register_group(group: Group, from_: telebot.types.Message):
+    group.title = from_.chat.title
+    group.id = from_.chat.id
+    group.registering = None
+
+
+def init_registering_group(from_: telebot.types.Message):
+    groups.append(
+        Group(registering=from_, members={Member(id=from_.from_user.id, username=from_.from_user.username)})
+    )
+
+
+def init_bot_handlers(bot):
+    @bot.message_handler(commands=['start'])
+    def start_command(message: telebot.types.Message):
+        if message.chat.type == "private":
+            logging.log(logging.INFO, message.chat.username)
+        elif message.chat.type == "supergroup":
+            if any(group.id == message.chat.id for group in groups):
+                bot.send_message(message.chat.id, "Already registered")
+                return
+            elif any(same_origin(group.registering, message) for group in groups):
+                bot.send_message(message.chat.id, "Already registering")
+                return
+
+            init_registering_group(message)
+
+            bot.send_message(message.chat.id, f"{call_sender(message)}\nEnter password:")
+            bot.register_next_step_handler(message, password_check)
+
+    def password_check(message):
+        if message.text == os.getenv('PASSWORD'):
+            matched_groups = [group for group in groups if
+                              group.registering is not None and same_origin(group.registering, message)]
+            if len(matched_groups) > 1 or len(matched_groups) == 0:
+                bot.send_message(message.chat.id, "Groups error")
+                return
+            group = matched_groups[0]
+            register_group(group, message)
+            bot.send_message(message.chat.id, "Password accepted")
+            if group.registering is not None and same_origin(group.registering, message):
+                register_group(group, message)
+                bot.register_next_step_handler(message, None)
+                bot.send_message(message.chat.id, "Password accepted")
+            else:
+                bot.send_message(message.chat.id, "Unknown user")
+
+        else:
+            bot.send_message(message.chat.id, "Wrong password")
+            return
+
+        logging.log(logging.INFO, groups)
+
+    @bot.message_handler(commands=['help'])
+    def send_welcome(message):
+        bot.reply_to(message, "Howdy, how are you doing?")
+        if message.chat.type == "private":
+            logging.log(logging.INFO, message.chat.username)
+
+        if message.chat.type == "group":
+            logging.log(logging.INFO, "Upgrade to superchat")
+
+        if message.chat.type == "supergroup":
+            chat = bot.get_chat(message.chat.id)
+            count = bot.get_chat_member_count(message.chat.id)
+            # bot.register_my_chat_member_handler()
+            logging.log(logging.INFO, chat.username)
+            logging.log(logging.INFO, count)
+            logging.log(logging.INFO, message.chat.active_usernames)
+
+    @bot.message_handler(content_types=['text'])
+    def processing(message: telebot.types.Message):
+        if message.chat.type == "supergroup":
+            group = find_group(message)
+            group.members.add(Member.from_(message))
+            logging.info(group)
