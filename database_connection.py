@@ -36,10 +36,8 @@ def db_find_group(by: telebot.types.Message):
         stmt = select(Group).where(Group.id == by.chat.id)
         matches = session.execute(stmt)
 
-        if matches.rowcount == 0 or matches.rowcount > 1:
-            return None
-
-        return matches[0]
+        for match in matches:
+            return match
 
 
 def db_member_exists(message: telebot.types.Message):
@@ -47,14 +45,11 @@ def db_member_exists(message: telebot.types.Message):
         stmt = select(Group).where(Group.id == message.chat.id)
         matches = session.execute(stmt)
 
-        if matches.rowcount > 1 or matches.rowcount == 0:
-            return True
-            return False
-
-        # find a member in matches with the same id as message.from_user.id
-        for member in matches[0].members:
-            if member.id == message.from_user.id:
-                return True
+        for match in matches:
+            # find a member in matches with the same id as message.from_user.id
+            for member in match.members:
+                if member.id == message.from_user.id:
+                    return True
 
         return False
 
