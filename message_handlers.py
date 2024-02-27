@@ -4,7 +4,7 @@ import os
 import telebot
 
 from custom_dataclasses import *
-from database_connection import add_group, db_register, add_member, db_find_group
+from database_connection import db_register, db_member_exists, db_add_member
 from helper import *
 
 groups: list[Group] = list()
@@ -68,10 +68,11 @@ def init_bot_handlers(bot):
             # register_group(group, message)
             # bot.send_message(message.chat.id, "Password accepted")
             if group.registering is not None and same_origin(group.registering, message):
-                register_group(group, message)
-                bot.register_next_step_handler(message, processing)
                 bot.send_message(message.chat.id, "Password accepted")
-                bot.send_message(group.id, f"Registered {group.id}")
+                register_group(group, message)
+                bot.send_message(message.chat.id, f"Registered {message.chat.id}")
+                bot.register_next_step_handler(message, processing)
+
             else:
                 bot.send_message(message.chat.id, "Unknown user")
 
@@ -101,9 +102,8 @@ def init_bot_handlers(bot):
     @bot.message_handler(content_types=['text'])
     def processing(message: telebot.types.Message):
         if message.chat.type == "supergroup":
-            group = db_find_group(message)
+            if db_member_exists(message):
+                return
             member = Member.from_(message)
-            if not group.members.contains(member):
-                group.members.append(member)
-                add_member(member)
-                logging.info(group)
+            logging.info(member)
+            db_add_member(member)
