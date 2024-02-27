@@ -4,7 +4,7 @@ import os
 import telebot
 
 from custom_dataclasses import *
-from database_connection import add_group, db_register
+from database_connection import add_group, db_register, add_member, db_find_group
 from helper import *
 
 groups: list[Group] = list()
@@ -27,22 +27,11 @@ def originates(message: telebot.types.Message, from_: Group):
     return message.chat.id == from_.id
 
 
-def find_group(by: telebot.types.Message):
-    matches = [group for group in groups if
-               group.id == by.chat.id]
-
-    if len(matches) > 1 or len(matches) == 0:
-        return None
-
-    return matches[0]
-
-
 def register_group(group: Group, from_: telebot.types.Message):
     group.registering = None
-
     member = Member(id=from_.from_user.id, username=from_.from_user.username)
-    group = Group(registering=from_, id=from_.chat.id)
     db_register(group, member)
+    groups.remove(group)
 
 
 def init_registering_group(from_: telebot.types.Message):
@@ -111,8 +100,10 @@ def init_bot_handlers(bot):
 
     @bot.message_handler(content_types=['text'])
     def processing(message: telebot.types.Message):
-        pass
-        # if message.chat.type == "supergroup":
-        #     group = find_group(message)
-        #     group.members.add(Member.from_(message))
-        #     logging.info(group)
+        if message.chat.type == "supergroup":
+            group = db_find_group(message)
+            member = Member.from_(message)
+            if not group.members.contains(member):
+                group.members.append(member)
+                add_member(member)
+                logging.info(group)

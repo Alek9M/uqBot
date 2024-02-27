@@ -2,6 +2,8 @@ import os
 from typing import Optional
 
 import sqlalchemy
+import telebot
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from custom_dataclasses import reg, Member, Group
@@ -23,6 +25,15 @@ def add_member(*, member: Member):
         session.add(member)
         session.commit()
 
+def db_find_group(by: telebot.types.Message):
+    with Session(sql_engine) as session:
+        stmt = select(Group).where(Group.id.in_([by.chat.id]))
+        matches = session.scalars(stmt)
+
+        if not matches or len(matches) == 0:
+            return None
+
+        return matches[0]
 
 def add_group(*, group: Group):
     with Session(sql_engine) as session:
